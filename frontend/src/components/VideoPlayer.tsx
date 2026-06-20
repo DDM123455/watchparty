@@ -262,7 +262,8 @@ export default function VideoPlayer({
 
         const initHls = (useProxy: boolean) => {
           hlsRef.current?.destroy();
-          const hls = new Hls(useProxy ? { loader: ProxyHlsLoader } : {});
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const hls = new Hls(useProxy ? { loader: ProxyHlsLoader } as any : {});
           hlsRef.current = hls;
 
           hls.on(Hls.Events.ERROR, (_, data) => {

@@ -18,7 +18,7 @@ export interface TmdbMovie {
 export interface ProviderInfo {
   id: number;
   name: string;
-  logo_path: string;
+  logo_path?: string;
   key: string;
 }
 

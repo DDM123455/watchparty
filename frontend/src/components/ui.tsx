@@ -237,7 +237,7 @@ export function ThemeToggle() {
 
 // ── Icon-only button helper ──────────────────────────────────
 export function IconBtn({ children, onClick, title, style }: {
-  children: React.ReactNode; onClick?: () => void; title?: string; style?: React.CSSProperties;
+  children: React.ReactNode; onClick?: React.MouseEventHandler<HTMLButtonElement>; title?: string; style?: React.CSSProperties;
 }) {
   const [hov, setHov] = useState(false);
   return (

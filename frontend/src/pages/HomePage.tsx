@@ -7,7 +7,7 @@ import CreateRoomModal from '../components/CreateRoomModal';
 import { MovieNightTab } from '../components/movie-night/MovieNightTab';
 import {
   Logo, Avatar, ThemeToggle, IconBtn, Btn, Badge, LiveDot,
-  IcLogout, IcPlus, IcSearch, IcFilm, IcLock, IcUsers, IcPlay, IcPause, IcX,
+  IcLogout, IcPlus, IcSearch, IcFilm, IcLock, IcPlay, IcPause, IcX,
 } from '../components/ui';
 import type { Room, CreateRoomData } from '../types/room';
 
