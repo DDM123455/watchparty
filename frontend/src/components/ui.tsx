@@ -97,7 +97,7 @@ type BtnSize = 'sm' | 'md' | 'lg';
 
 export function Btn({ children, kind = 'primary', size = 'md', onClick, style, disabled, type = 'button' }: {
   children: React.ReactNode; kind?: BtnKind; size?: BtnSize;
-  onClick?: () => void; style?: React.CSSProperties;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>; style?: React.CSSProperties;
   disabled?: boolean; type?: 'button' | 'submit';
 }) {
   const [hov, setHov] = useState(false);
