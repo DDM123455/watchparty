@@ -11,7 +11,6 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { RoomsService } from '../rooms/rooms.service';
-import { WatchService } from './watch.service';
 import type { User } from '../users/user.entity';
 import type { VideoState, MemberInfo, WbItem } from './types';
 
@@ -39,8 +38,6 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly socketRooms = new Map<string, Set<string>>();
   // roomId (short) → host's User UUID
   private readonly roomHosts = new Map<string, string>();
-  // roomId (short) → Room DB UUID (for message FK)
-  private readonly roomDbIds = new Map<string, string>();
   // roomId (short) → control mode
   private readonly roomModes = new Map<string, 'host_only' | 'collaborative'>();
   // roomId → whiteboard items
@@ -56,7 +53,6 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly roomsService: RoomsService,
-    private readonly watchService: WatchService,
   ) {}
 
   async handleConnection(socket: AuthSocket): Promise<void> {
@@ -125,7 +121,6 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!this.roomHosts.has(roomId)) {
       const room = await this.roomsService.findByRoomId(roomId);
       this.roomHosts.set(roomId, room.hostId);
-      this.roomDbIds.set(roomId, room.id);
       this.roomModes.set(roomId, room.mode ?? 'host_only');
     }
 
@@ -154,23 +149,10 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
       updatedAt: Date.now(),
     };
 
-    const roomDbId = this.roomDbIds.get(roomId)!;
-    const recentMsgs = await this.watchService.getRecentMessages(roomDbId);
-    const messages = recentMsgs.map((m) => ({
-      id: m.id,
-      content: m.content,
-      user: {
-        id: m.user.id,
-        displayName: m.user.displayName,
-        avatar: m.user.avatar,
-      },
-      createdAt: m.createdAt,
-    }));
-
     return {
       state,
       members,
-      messages,
+      messages: [],
       wbItems: this.roomWhiteboards.get(roomId) ?? [],
       screenSharerId: this.roomScreenSharerId.get(roomId) ?? null,
     };
@@ -267,7 +249,6 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
       try {
         const room = await this.roomsService.findByRoomId(payload.roomId);
         this.roomHosts.set(payload.roomId, room.hostId);
-        this.roomDbIds.set(payload.roomId, room.id);
         this.roomModes.set(payload.roomId, room.mode ?? 'host_only');
       } catch {
         return { ok: false, error: 'Room not found' };
@@ -309,29 +290,22 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('chat:send')
-  async handleChatSend(
+  handleChatSend(
     @ConnectedSocket() socket: AuthSocket,
     @MessageBody() payload: { roomId: string; message: string },
-  ): Promise<void> {
+  ): void {
     const user = socket.data.user;
-    const roomDbId = this.roomDbIds.get(payload.roomId);
-    if (!user || !roomDbId || !payload.message?.trim()) return;
-
-    const saved = await this.watchService.saveMessage({
-      content: payload.message.trim(),
-      userId: user.id,
-      roomId: roomDbId,
-    });
+    if (!user || !payload.message?.trim()) return;
 
     this.server.to(payload.roomId).emit('chat:receive', {
-      id: saved.id,
-      content: saved.content,
+      id: crypto.randomUUID(),
+      content: payload.message.trim(),
       user: {
         id: user.id,
         displayName: user.displayName,
         avatar: user.avatar,
       },
-      createdAt: saved.createdAt,
+      createdAt: new Date(),
     });
   }
 
@@ -475,7 +449,6 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.roomMembers.delete(roomId);
       this.roomStates.delete(roomId);
       this.roomHosts.delete(roomId);
-      this.roomDbIds.delete(roomId);
       this.roomModes.delete(roomId);
       this.roomWhiteboards.delete(roomId);
       this.roomScreenSharerId.delete(roomId);
@@ -500,7 +473,6 @@ export class WatchGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.roomMembers.delete(roomId);
     this.roomStates.delete(roomId);
     this.roomHosts.delete(roomId);
-    this.roomDbIds.delete(roomId);
     this.roomModes.delete(roomId);
     this.roomWhiteboards.delete(roomId);
     this.roomScreenSharerId.delete(roomId);
