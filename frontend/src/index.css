@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+/* ── Design tokens ──────────────────────────────────────────── */
+:root {
+  --font-display: "Inter", system-ui, -apple-system, sans-serif;
+  --font-body:    "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Dark theme (default) */
+  --bg:         #0d0d13;
+  --surface:    #15151e;
+  --surface-2:  #1c1c28;
+  --border:     rgba(255,255,255,0.075);
+  --accent:     #3b6ef8;
+  --accent-text:#7fa8ff;
+  --text:       #eeeef5;
+  --text-muted: #8585a0;
+  --text-faint: #50506a;
+  --field:      #0f0f1a;
+  --shadow-sm:  0 1px 4px rgba(0,0,0,0.45);
+  --shadow-lg:  0 20px 60px rgba(0,0,0,0.55);
+  --player-bg:  #080810;
+  --scrim:      #000;
+  --ph-a:       #191924;
+  --ph-b:       #13131e;
+  --warn:       #f59e0b;
+  --ok-text:    #4ade80;
+}
+
+[data-theme="light"] {
+  --bg:         #f5f4f0;
+  --surface:    #ffffff;
+  --surface-2:  #edece8;
+  --border:     rgba(0,0,0,0.09);
+  --accent:     #2a6fdb;
+  --accent-text:#1a4fa0;
+  --text:       #1a1824;
+  --text-muted: #5a5870;
+  --text-faint: #9090a8;
+  --field:      #f8f7f3;
+  --shadow-sm:  0 1px 4px rgba(0,0,0,0.08);
+  --shadow-lg:  0 20px 60px rgba(0,0,0,0.12);
+  --player-bg:  #1a1824;
+  --scrim:      #000;
+  --ph-a:       #e4e3de;
+  --ph-b:       #dad9d4;
+  --warn:       #d97706;
+  --ok-text:    #16a34a;
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+@keyframes wpFade {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+
+@keyframes wpRise {
+  from { opacity: 0; transform: translateY(14px) scale(0.97) }
+  to   { opacity: 1; transform: none }
+}
+
+@keyframes wpPulse {
+  0%, 100% { opacity: 1; transform: scale(1) }
+  50%       { opacity: 0; transform: scale(2.4) }
+}
+
+.wp-pulse {
+  animation: wpPulse 1.8s cubic-bezier(.4,0,.6,1) infinite;
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg) }
+}
+
+/* ── Room page responsive helpers ───────────────────────────── */
+.room-sidebar-tabs       { display: none }
+.room-sidebar-members    { display: block }
+.room-sidebar-chat       { display: flex; flex-direction: column; flex: 1; min-height: 0 }
+
+@media (max-width: 767px) {
+  .room-body              { flex-direction: column !important }
+  .room-player            { flex: none !important; width: 100% }
+  .room-sidebar           { flex: 1 !important; min-height: 0; width: 100% !important; border-left: none !important; border-top: 1px solid var(--border) }
+  .room-sidebar-tabs      { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0 }
+  .room-sidebar-members   { display: none }
+  .room-sidebar-members.active { display: block }
+  .room-sidebar-chat.hidden    { display: none }
+  .chat-panel-header      { display: none !important }
+  .theater-toggle         { display: none !important }
+}
+
+/* ── Video player floating controls ─────────────────────────────── */
+.player-ctrl-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: none;
+  background: rgba(255,255,255,0.1); color: #fff;
+  cursor: pointer; display: grid; place-items: center; flex-shrink: 0;
+  transition: background .15s, transform .12s;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.player-ctrl-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.22);
+  transform: scale(1.1);
+}
+.player-ctrl-btn:active:not(:disabled) { transform: scale(0.95) }
+.player-ctrl-btn:disabled { opacity: 0.3; cursor: default }
+.player-ctrl-play {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.18);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.35);
+}
+.player-ctrl-play:hover:not(:disabled) {
+  background: rgba(255,255,255,0.28);
+  transform: scale(1.06);
+}
+
+::-webkit-scrollbar        { width: 6px; height: 6px }
+::-webkit-scrollbar-track  { background: transparent }
+::-webkit-scrollbar-thumb  { background: var(--surface-2); border-radius: 999px }
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint) }
