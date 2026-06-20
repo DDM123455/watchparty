@@ -12,7 +12,7 @@ export function useRooms() {
     setError(null);
     try {
       const { data } = await api.get<Room[]>('/rooms');
-      setRooms(data);
+      setRooms(Array.isArray(data) ? data : []);
     } catch {
       setError('Failed to load rooms');
     } finally {

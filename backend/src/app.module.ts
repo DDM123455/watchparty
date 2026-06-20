@@ -22,7 +22,7 @@ import { MovieNightModule } from './movie-night/movie-night.module';
           type: 'postgres' as const,
           url: dbUrl,
           autoLoadEntities: true,
-          synchronize: config.get<string>('NODE_ENV') !== 'production',
+          synchronize: config.get<string>('TYPEORM_SYNC') === 'true' || config.get<string>('NODE_ENV') !== 'production',
           // Keep connections alive — prevents Supabase/cloud DBs from killing idle conns
           extra: {
             max: 10,
